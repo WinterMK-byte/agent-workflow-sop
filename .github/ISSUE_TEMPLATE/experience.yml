@@ -1,0 +1,62 @@
+# 「整份用下来如何」—— 与"反例"分开，因为两者回答的问题不同：
+#   反例  = 某一条不成立（局部、精确、最容易被采纳）
+#   实战  = 整体用下来哪些成立（全局、模糊、决定这份文档该往哪走）
+name: 实战反馈 · 照着做了，结果如何
+description: 整份 SOP 用下来，哪些成立、哪些不成立、代价是什么
+title: "[实战] "
+labels: ["experience"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        建议**先跑一段时间再来写** —— 刚读完的观感（"写得挺清楚"）信息量很低；
+        跑过之后的观感（"第 4 步我们根本没人做"）才是数据。
+
+        如果只想说**某一节**，请改用「反例」那张表。
+  - type: textarea
+    id: scale
+    attributes:
+      label: 你的规模与结构
+      description: 几个人 / 几个 Agent / 几个业务线 / 有没有中间层
+      placeholder: "1 人 + 3 个 Agent，没有中间层，两个业务线。"
+    validations:
+      required: true
+  - type: textarea
+    id: held
+    attributes:
+      label: 哪些**成立**了
+      description: 逐节说，哪几节照做之后真的解决了问题。有前后对比最好。
+    validations:
+      required: true
+  - type: textarea
+    id: failed
+    attributes:
+      label: 哪些**不成立**
+      description: 照做了但没效果、或者根本做不到（做不到本身也是重要信息 —— 说明前置条件没写清）。
+    validations:
+      required: true
+  - type: textarea
+    id: cost
+    attributes:
+      label: 代价
+      description: 落地这套东西，你额外付出了什么？（时间 / token / 人的注意力 / 摩擦）
+    validations:
+      required: false
+  - type: dropdown
+    id: recommended
+    attributes:
+      label: 你会推荐给同类团队吗
+      options:
+        - 会，但只在特定规模下
+        - 会，整份照用
+        - 只会用其中一两节
+        - 不会
+    validations:
+      required: false
+  - type: checkboxes
+    id: precheck
+    attributes:
+      label: 提交前自查
+      options:
+        - label: 我没有写真实的路径 / 账号 / 人员姓名 / 内部系统名
+          required: true
