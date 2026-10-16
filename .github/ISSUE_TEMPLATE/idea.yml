@@ -1,0 +1,63 @@
+# 本仓库唯一的硬规矩在这里变成**必填字段**：主张必须带判据。
+# 一份「我觉得应该……」的提案没法落地；「什么条件下成立、怎么验证」才能写进正文。
+name: 想法 · 加一条 / 改一条
+description: 想加或想改某条规矩 —— 请带上判据
+title: "[想法] "
+labels: ["idea"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        本仓库的硬规矩：**主张必须带判据**（见 [CONTRIBUTING](https://github.com/WinterMK-byte/agent-workflow-sop/blob/main/CONTRIBUTING.md)）。
+
+        | ❌ 主张 | ✅ 可执行的规则 |
+        |---|---|
+        | 「应该直派」 | 「**连续 3 次**可验证回执 + 独立复核通过后才直派」 |
+
+        如果只是想问「我这情况该怎么用」，请走 [Discussions](https://github.com/WinterMK-byte/agent-workflow-sop/discussions)。
+  - type: textarea
+    id: problem
+    attributes:
+      label: 你想解决什么问题
+      description: 先描述**问题本身**（谁在什么场景下卡住了），不要一上来就描述方案。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 你设想的规矩
+      description: 一句话能写清最好；写不清说明它还没成形。
+    validations:
+      required: true
+  - type: textarea
+    id: criterion
+    attributes:
+      label: ★ 判据：什么条件下成立 / 怎么验证
+      description: |
+        这是本仓库**最重要的一栏**。至少回答两个问题：
+        ① 什么条件下它成立、什么条件下不成立？
+        ② 别人怎么验证自己做到了？
+      placeholder: |
+        成立条件：执行方能连续 3 次给出可验证回执。
+        不成立：其中任一次需要出单方追问才回。
+        怎么验：看总线日志里有没有对应条目 + 出单方独立跑一遍验证命令。
+    validations:
+      required: true
+  - type: textarea
+    id: rejection
+    attributes:
+      label: 它什么情况下**不该**用（可选）
+      description: 写清失效边界，比多写三条优点有用。
+    validations:
+      required: false
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: 边界自查
+      options:
+        - label: 这条规矩不是在"再包一层流程"（本 SOP 立论是砍掉互请与审批）
+          required: false
+        - label: 它不依赖任何具体产品 / 平台的名词
+          required: false
+        - label: 工具类的东西我会提到 wb-bot，不提到这里
+          required: false
