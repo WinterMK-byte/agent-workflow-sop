@@ -1,0 +1,72 @@
+# ★ 这份文档最需要的一种输入：反例。
+#
+# 为什么把它做成"必填字段最严"的一张表：
+#   本 SOP 的每条结论都来自真实落地（包括被推翻的主张）。
+#   0.2 那次大改 —— 把"直派不经中间层"改成"带四条判据的条件性条款" ——
+#   就是被一个反例推动的（真实事故：一张单没落地、也没人说，瞒了 6 天）。
+#   所以"我同意"没有信息量，「这条在我这儿不成立」才有。
+name: 反例 · 哪条规矩不成立
+description: 你在真实场景里发现某一节有问题 —— 这是本仓库最欢迎的输入
+title: "[反例] "
+labels: ["counterexample"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        本仓库的每条规矩都来自真实落地。**提出反例不是挑刺，是这份文档唯一的成长方式。**
+
+        填之前可以看一眼 [README](https://github.com/WinterMK-byte/agent-workflow-sop#七落地状态别照抄草案--这段最重要) 的 **§七 落地状态** ——
+        那里已经写明哪些主张被加了条件。如果你的反例**正好打在那条条件上**（比如"我们连续 3 次都做到了，撤掉中间层还是出事了"），
+        那价值最高。
+  - type: input
+    id: section
+    attributes:
+      label: 哪一节 / 哪条规矩
+      description: 章节号或原句。
+      placeholder: "§三 投递双通道 —— 「贴脸放进接收方工作区」"
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: 你的场景
+      description: 几个人 / 几个 Agent / 什么运行时 / 有没有中间层。**规模不同，结论常常不同。**
+      placeholder: "1 个人 + 4 个 Agent，两个不同厂商的运行时，其中一侧没有 API。"
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: 为什么它不成立
+      description: 卡在哪一步？是前提不成立、还是照做了但结果相反？
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 你的实际做法
+      description: ★ 这一段最有价值 —— 你最后改成了什么，以及为什么这样能work。
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 证据 / 代价
+      description: 有实测或日志最好；没有就写清代价（白干多久 / 丢了什么 / 瞒了几天）。
+    validations:
+      required: false
+  - type: checkboxes
+    id: publishable
+    attributes:
+      label: 收录许可
+      description: 如果这个反例成立，它会改进正文（也可能进 CHANGELOG）。请确认可以脱敏后收录。
+      options:
+        - label: 同意脱敏后写进文档（不愿意可取消勾选 —— 那这条就只留在 issue 里）
+          required: false
+  - type: checkboxes
+    id: precheck
+    attributes:
+      label: 提交前自查
+      options:
+        - label: 我没有写真实的路径 / 账号 / 人员姓名 / 内部系统名
+          required: true
