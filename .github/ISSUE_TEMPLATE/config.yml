@@ -1,0 +1,12 @@
+# issue 是「精确的反例 / 可复现的问题」，不是提问通道。
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 提问 / 讨论（「我这情况该怎么用」走这里）
+    url: https://github.com/WinterMK-byte/agent-workflow-sop/discussions
+    about: 用法咨询、方案讨论、展示你的落地方式 —— 这类问题请走 Discussions，issue 留给精确的反例与反馈。
+  - name: 🧰 工具 / 代码 / 模板类问题
+    url: https://github.com/WinterMK-byte/wb-bot/issues/new/choose
+    about: 本仓库是**流程层**（只定规矩）。要总线、租约、迁移这些**器具**请去姊妹项目 wb-bot。
+  - name: 📖 贡献指南（含本仓库唯一硬规矩：主张必须带判据）
+    url: https://github.com/WinterMK-byte/agent-workflow-sop/blob/main/CONTRIBUTING.md
+    about: 提交前跑什么、写作要求、"主张必须带判据"的写法示例。
