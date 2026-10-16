@@ -1,0 +1,15 @@
+# 本仓库零依赖（只有标准库），所以这里只管一样东西：Actions 的版本。
+#
+# 为什么还要开：**无人看管的 pin 会悄悄烂掉**。
+# `actions/checkout@v4` 这类标签会随 runner 的 Node 运行时升级而失效 ——
+# 它不会因为我们没动代码就保持不变。定期开 PR 比"某天 CI 突然全红"便宜得多。
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "ci"
+    labels:
+      - "dependencies"
