@@ -1,0 +1,84 @@
+# 这份仓库里全是字，所以「字对不对」就是全部的质量。
+#
+# 两个 job 一个文件：
+#   check   —— 每次 push / PR：链接可达 + 反馈入口在 + CHANGELOG 降序
+#   release —— 只在打 tag 时：notes 从 CHANGELOG 抽，建 Release
+#
+# 为什么不引第三方 action：发版链条上少一个依赖，少一处可能悄悄变味的地方。
+# 只用 runner 自带的 `gh`。
+name: 文档检查与发版
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: 文档检查
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # 先证明检查器**抓得到错**，再用它检查文档 ——
+      # 不然"检查通过"可能只是因为它什么都没查。
+      - name: 检查器自测（8 个用例 + 抽段）
+        run: python tools/docs_check.py --selftest
+
+      - name: 链接 / 反馈入口 / 变更日志
+        run: python tools/docs_check.py
+
+      - name: CHANGELOG 每个版本都抽得出（发版流程依赖它）
+        shell: bash
+        run: |
+          for v in $(grep -oP '(?<=^## \[)[0-9][^]]*' CHANGELOG.md); do
+            python tools/docs_check.py --extract "$v" > /dev/null
+            echo "  ✅ 可抽出 [$v]"
+          done
+
+  release:
+    name: 发版
+    needs: check
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write      # 建 Release 需要写权限（只给这一个 job）
+    env:
+      TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # ★ tag 说的版本 必须等于 CHANGELOG 首条
+      #   不查这一条，就会发出「v0.4.0 的 release，内容是 0.3.0」这种
+      #   **不可撤销的公开错误**。
+      - name: 版本与 tag 对齐
+        run: |
+          echo "tag = $TAG"
+          python tools/docs_check.py --expect "${TAG#v}"
+
+      - name: 从 CHANGELOG 抽本次版本的 notes
+        run: |
+          python tools/docs_check.py --extract "${TAG#v}" --out notes.md
+          head -n 15 notes.md
+
+      - name: 建 Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG 已存在 —— 更新 notes（重跑安全）"
+            gh release edit "$TAG" --notes-file notes.md
+          else
+            gh release create "$TAG" --title "$TAG" --notes-file notes.md
+          fi
