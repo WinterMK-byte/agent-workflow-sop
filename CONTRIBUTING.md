@@ -41,8 +41,8 @@
 ## 提交前跑这一条
 
 ```bash
-python tools/docs_check.py --selftest   # 先证明检查器抓得到错（9 个用例）
-python tools/docs_check.py              # 链接可达 + 反馈入口在 + CHANGELOG 降序
+python tools/docs_check.py --selftest   # 先证明检查器抓得到错（10 个用例 + 抽段）
+python tools/docs_check.py              # 链接可达 + 反馈入口在 + CHANGELOG 降序 + ★迁移架构不得漏
 ```
 
 > 加/改文档时注意：**新文档必须被 README 链到**，否则它存在但没人会走到那儿 ——

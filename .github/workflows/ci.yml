@@ -30,10 +30,10 @@ jobs:
 
       # 先证明检查器**抓得到错**，再用它检查文档 ——
       # 不然"检查通过"可能只是因为它什么都没查。
-      - name: 检查器自测（8 个用例 + 抽段）
+      - name: 检查器自测（10 个用例 + 抽段）
         run: python tools/docs_check.py --selftest
 
-      - name: 链接 / 反馈入口 / 变更日志
+      - name: 链接 / 反馈入口 / 变更日志 / ★迁移架构不得漏
         run: python tools/docs_check.py
 
       - name: CHANGELOG 每个版本都抽得出（发版流程依赖它）

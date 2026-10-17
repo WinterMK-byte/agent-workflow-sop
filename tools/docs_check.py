@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """文档检查 —— 这份仓库里全是字，所以「字对不对」就是全部的质量。
 
-四个检查（每条都对应一种**不报错**的失效）：
+五个检查（每条都对应一种**不报错**的失效）：
 
   ① 相对链接可达（含**大小写**）
      文档改名/合并后别处的引用原地作废，读者点进去 404，维护者永远不知道。
@@ -17,14 +17,20 @@
   ④ 能从 CHANGELOG 抽段（发版用 —— `--extract`）
      Release notes 派生自 CHANGELOG：单一真源，手写必然漂。
 
+  ⑤ ★ 「迁移架构不得漏」
+     本 SOP 自己踩过：0.1–0.2 描述了「谁该干什么」，
+     却漏掉「**执行层会被不断重建**」这个必然事实 ——
+     ⇒ 第一次重建就丢身份与在办事项，而且**不报错**。
+     补了 0.3 之后，这条检查负责让它**不会再一次被删掉/漏掉**。
+
 刻意排除的误判（假红比不报更坏）：
   · 代码块里的 `[x](y)` 不是链接
   · 外链 / 锚点 / mailto 不检查；只要目标存在即可（允许链到目录）
 
 用法：
   python tools/docs_check.py                     # 查本仓库
-  python tools/docs_check.py --selftest          # 自测（7 个用例）
-  python tools/docs_check.py --extract 0.4.0 --out notes.md
+  python tools/docs_check.py --selftest          # 自测（10 个用例 + 抽段）
+  python tools/docs_check.py --extract 0.5.0 --out notes.md
 退出码：0 = 通过
 """
 import os
@@ -132,6 +138,31 @@ def changelog_versions(root):
     return RE_HEAD.findall(open(p, encoding="utf-8", errors="replace").read())
 
 
+# ★ 「迁移架构不得漏」的判据词。
+#   为什么是这几个而不是「有没有 §六 这个编号」：
+#   编号会随重排而变，**规矩不会**。检查「判据在不在」，比检查「编到第几节」稳。
+MIGRATION_MARKERS = (
+    "迁移架构",            # 有这一整块
+    "四律",                # 定了规矩，不是随口一提
+    "会变的，不写死",       # 律一
+    "权威，只有一处",       # 律二
+    "入口，挂启动必读位",   # 律三
+    "形状与接线",          # 律四
+)
+
+
+def check_migration_section(root):
+    p = os.path.join(root, "README.md")
+    if not os.path.isfile(p):
+        return [("README.md", 0, "-", "README.md 不存在")]
+    txt = open(p, encoding="utf-8", errors="replace").read()
+    missing = [m for m in MIGRATION_MARKERS if m not in txt]
+    if missing:
+        return [("README.md", 0, " / ".join(missing),
+                 "迁移架构这一节不完整或缺失（漏了它 = 描述了一个不存在的稳态）")]
+    return []
+
+
 def key(v):
     parts = [int(t) if t.isdigit() else -1 for t in v.split(".")]
     return tuple(parts + [0] * (4 - len(parts)))
@@ -165,12 +196,13 @@ def extract(root, version):
 def check(root=ROOT, quiet=False, expect=None):
     if not quiet:
         print("=" * 70)
-        print("文档检查（链接 / 反馈入口 / 变更日志）")
+        print("文档检查（链接 / 反馈入口 / 变更日志 / 迁移架构）")
         print("=" * 70)
 
     links = scan_links(root)
     entry = check_readme_entry(root)
     clog = check_changelog(root)
+    migr = check_migration_section(root)
     vs = changelog_versions(root)
 
     if not quiet:
@@ -184,8 +216,11 @@ def check(root=ROOT, quiet=False, expect=None):
         print("  %s CHANGELOG 降序      %s"
               % ("✅" if not clog else "❌",
                  "最新 %s（共 %d 条）" % (vs[0] if vs else "?", len(vs))))
+        print("  %s 迁移架构不得漏       %s"
+              % ("✅" if not migr else "❌",
+                 "四律齐全" if not migr else "缺判据词"))
 
-    problems = links + entry + clog
+    problems = links + entry + clog + migr
     if expect and (not vs or vs[0] != expect):
         problems.append(("CHANGELOG.md", 0, expect,
                          "当前版本（首条）%s ≠ 期望 %s" % (vs[0] if vs else "无", expect)))
@@ -209,8 +244,19 @@ def _selftest():
     """★ 每个用例先清空目录再铺料 —— 用例之间不得互留状态（否则自测本身在骗人）。"""
     tmp = os.path.join(tempfile.gettempdir(), "sop-docs-check")
     fails = []
+
+    # ★ 干净的 README 必须**自带**迁移架构块 —— 否则新的第 ⑤ 项会把所有正例判红
+    MIGRATION_BLOCK = (
+        "\n## 六、迁移架构（协作架构缺了它 = 残缺）\n\n"
+        "### 6.6 迁移四律\n\n"
+        "| # | 律 |\n|---|---|\n"
+        "| 一 | 会变的，不写死 |\n"
+        "| 二 | 权威，只有一处 |\n"
+        "| 三 | 入口，挂启动必读位 |\n"
+        "| 四 | 形状与接线，必须分离 |\n"
+    )
     CLEAN_README = ("# x\n\n见 [a](docs/a.md)\n贡献见 [CONTRIBUTING.md](CONTRIBUTING.md)\n"
-                    "问题提 issues\n")
+                    "问题提 issues\n" + MIGRATION_BLOCK)
 
     def write(rel, text):
         p = os.path.join(tmp, rel)
@@ -243,6 +289,11 @@ def _selftest():
          lambda: (base(), write("README.md", "# x\n见 [a](docs/a.md)\n")), None, 1),
         ("CHANGELOG 乱序",
          lambda: (base(), write("CHANGELOG.md", "## [0.3.0] - a\n\n## [0.4.0] - b\n")), None, 1),
+        # ★ 第 ⑤ 项的两个反向用例 —— 证明「迁移架构不得漏」真的抓得到
+        ("迁移架构整块被删",
+         lambda: (base(), write("README.md", CLEAN_README.replace(MIGRATION_BLOCK, ""))), None, 1),
+        ("四律只剩三条",
+         lambda: (base(), write("README.md", CLEAN_README.replace("会变的，不写死", "甲"))), None, 1),
         ("--expect 不符 -> 拒发", base, ["--expect", "9.9.9"], 1),
         ("--expect 命中", base, ["--expect", "0.4.0"], 0),
     ]
